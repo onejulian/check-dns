@@ -718,3 +718,146 @@ button:disabled {
         page-break-inside: avoid;
     }
 }
+
+/* ———————————————————————————————— */
+/* Mejoras Mobile-First y tactiles     */
+/* ———————————————————————————————— */
+
+/* Pestañas y botones de vista: scroll horizontal en móviles */
+.tabs-scroll, .views-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.tabs-scroll::-webkit-scrollbar, .views-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+/* Tap targets más grandes en móviles */
+@media (max-width: 640px) {
+    .tab-btn, .view-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        min-width: 44px;
+        min-height: 36px;
+    }
+
+    #lookupButton, #batchLookupButton, #compareButton {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        border-radius: 10px;
+    }
+
+    input, textarea, select {
+        font-size: 16px; /* evita zoom en iOS */
+    }
+}
+
+/* Toolbar de resultados: apilada y con espacios adecuados en móvil */
+@media (max-width: 768px) {
+    #resultsToolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+    #resultsToolbar > div:first-child {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    #resultsToolbar .relative {
+        width: 100%;
+    }
+
+    #resultsToolbar input#filterResults {
+        width: 100%;
+    }
+}
+
+/* Tabla: mejorar legibilidad y permitir scroll horizontal suave */
+#tableView {
+    -webkit-overflow-scrolling: touch;
+}
+
+table {
+    min-width: 640px;
+}
+
+/* Tarjetas: espaciado y botones de copia accesibles */
+.dns-record-value .copy-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Safe areas para notches */
+body, header, main, #toast {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+}
+
+#toggleFavorites {
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    right: calc(1rem + env(safe-area-inset-right));
+}
+
+/* Inputs y dropdowns: elevar z-index en móvil para evitar solapes */
+@media (max-width: 768px) {
+    #historyDropdown {
+        z-index: 60;
+        max-height: 240px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Tooltip: posicionamiento y ancho max en móvil */
+@media (max-width: 640px) {
+    #dnsTooltip {
+        max-width: 90vw;
+        left: 1rem !important;
+        right: 1rem !important;
+    }
+}
+
+/* Inputs compactos en mobile */
+@media (max-width: 640px) {
+    .dns-card .dns-record-value {
+        font-size: 0.8125rem;
+    }
+}
+
+/* Panel flotante favoritos en mobile: slide desde abajo */
+@media (max-width: 768px) {
+    #favoritesPanel {
+        position: fixed;
+        bottom: 0;
+        top: auto;
+        max-height: 70vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        animation: slideUp 0.25s ease-out;
+    }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+/* Campos del formulario: espacios consistentes */
+.search-form input[type="text"],
+.search-form textarea,
+.search-form select {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+/* Botones de exportación compactos en móvil */
+@media (max-width: 640px) {
+    #resultsToolbar .flex.gap-2 button {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+    }
+}

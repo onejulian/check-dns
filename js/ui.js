@@ -897,6 +897,14 @@ const UI = {
         this.elements.settingsModal.classList.remove('hidden');
         this.state.settingsOpen = true;
         this.loadSettings();
+        
+        // Verificar si la app puede ser instalada
+        if (window.deferredPrompt) {
+            const installSection = document.getElementById('installAppSection');
+            if (installSection) {
+                installSection.classList.remove('hidden');
+            }
+        }
     },
 
     // Cerrar configuración

@@ -138,30 +138,42 @@ document.addEventListener('visibilitychange', () => {
 
 // Manejar instalación de PWA
 let deferredPrompt;
+// Hacer deferredPrompt accesible globalmente
+window.deferredPrompt = null;
 
 window.addEventListener('beforeinstallprompt', (e) => {
     // Prevenir el prompt automático
     e.preventDefault();
     deferredPrompt = e;
+    window.deferredPrompt = e; // Hacer accesible globalmente
     
-    // Mostrar botón de instalación personalizado
+    // Mostrar botón de instalación en la modal de configuración
     showInstallButton();
 });
 
 function showInstallButton() {
-    // Crear botón de instalación si no existe
-    if (!document.getElementById('installPWA')) {
-        const button = document.createElement('button');
-        button.id = 'installPWA';
-        button.className = 'fixed bottom-20 right-4 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-lg transition z-30';
-        button.innerHTML = '<i class="fas fa-download mr-2"></i>Instalar App';
-        button.addEventListener('click', installPWA);
-        document.body.appendChild(button);
+    // Mostrar la sección de instalación en la modal de configuración
+    const installSection = document.getElementById('installAppSection');
+    if (installSection) {
+        installSection.classList.remove('hidden');
+        
+        // Vincular evento al botón de instalación
+        const installButton = document.getElementById('installPWA');
+        if (installButton && !installButton.hasAttribute('data-listener-added')) {
+            installButton.addEventListener('click', installPWA);
+            installButton.setAttribute('data-listener-added', 'true');
+        }
+        
+        // Mostrar notificación sutil
+        UI.showToast('✨ La aplicación está lista para instalarse desde la configuración', 'info');
     }
 }
 
 async function installPWA() {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+        UI.showToast('La aplicación ya está instalada o no está disponible para instalar', 'info');
+        return;
+    }
     
     // Mostrar prompt de instalación
     deferredPrompt.prompt();
@@ -172,17 +184,28 @@ async function installPWA() {
     if (outcome === 'accepted') {
         UI.showToast('Aplicación instalada exitosamente', 'success');
         
-        // Ocultar botón de instalación
-        const button = document.getElementById('installPWA');
-        if (button) button.remove();
+        // Ocultar sección de instalación
+        const installSection = document.getElementById('installAppSection');
+        if (installSection) {
+            installSection.classList.add('hidden');
+        }
+    } else {
+        UI.showToast('Instalación cancelada. Puedes instalarla más tarde desde la configuración', 'info');
     }
     
     deferredPrompt = null;
+    window.deferredPrompt = null; // Resetear también la variable global
 }
 
 // Detectar si la app fue instalada
 window.addEventListener('appinstalled', () => {
     console.log('PWA instalada');
+    
+    // Ocultar sección de instalación
+    const installSection = document.getElementById('installAppSection');
+    if (installSection) {
+        installSection.classList.add('hidden');
+    }
     
     // Enviar evento de analytics
     if (typeof gtag !== 'undefined') {

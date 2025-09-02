@@ -1,0 +1,720 @@
+/* Estilos personalizados para DNS Inspector Pro */
+
+:root {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-purple: #a855f7;
+    --accent-green: #10b981;
+    --border-color: #475569;
+}
+
+/* Tema claro mejorado */
+[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --border-color: #cbd5e1;
+    --accent-blue: #2563eb;
+    --accent-purple: #9333ea;
+    --accent-green: #059669;
+}
+
+/* Ajustes específicos para tema claro */
+[data-theme="light"] .dns-card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .dns-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--accent-blue);
+}
+
+[data-theme="light"] .dns-record-value {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+[data-theme="light"] .dns-record-value:hover {
+    background: #e2e8f0;
+}
+
+[data-theme="light"] .tab-btn.active {
+    background: #e2e8f0;
+    color: var(--accent-blue);
+}
+
+[data-theme="light"] .view-btn.active {
+    background: #e2e8f0;
+    color: var(--accent-blue);
+}
+
+[data-theme="light"] .history-item:hover {
+    background: #f1f5f9;
+}
+
+[data-theme="light"] .compact-item {
+    background: #ffffff;
+    border-color: #e2e8f0;
+}
+
+[data-theme="light"] .compact-item:hover {
+    background: #f8fafc;
+    border-color: var(--accent-blue);
+}
+
+[data-theme="light"] .favorite-item {
+    background: #f1f5f9;
+}
+
+[data-theme="light"] .favorite-item:hover {
+    background: var(--accent-blue);
+    color: white;
+}
+
+[data-theme="light"] .loader-spinner {
+    border-color: #e2e8f0;
+    border-top-color: var(--accent-blue);
+}
+
+[data-theme="light"] input[type="checkbox"].toggle-switch {
+    background: #cbd5e1 !important;
+}
+
+[data-theme="light"] .copy-btn {
+    background: var(--accent-blue);
+    color: white;
+}
+
+[data-theme="light"] .info-icon {
+    background: var(--accent-blue);
+    color: white;
+}
+
+[data-theme="light"] #dnsTooltip {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] #toast {
+    color: white;
+}
+
+[data-theme="light"] .glass {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.font-inter {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-blue);
+}
+
+/* Scrollbar para tema claro */
+[data-theme="light"] ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-blue);
+}
+
+/* Animaciones */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.loader-spinner {
+    border: 3px solid var(--bg-tertiary);
+    border-top: 3px solid var(--accent-blue);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Botones y controles */
+.tab-btn {
+    position: relative;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+}
+
+.tab-btn.active {
+    background: var(--bg-tertiary);
+    color: var(--accent-blue);
+}
+
+.view-btn {
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.view-btn:hover {
+    color: var(--text-primary);
+}
+
+.view-btn.active {
+    background: var(--bg-tertiary);
+    color: var(--accent-blue);
+}
+
+/* Toggle switch - Anular estilos de Tailwind Forms */
+input[type="checkbox"].toggle-switch {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    width: 48px !important;
+    height: 24px !important;
+    background: #475569 !important;
+    background-image: none !important;
+    border-radius: 12px !important;
+    position: relative !important;
+    cursor: pointer !important;
+    transition: background 0.3s !important;
+    outline: none !important;
+    border: none !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    color: transparent !important;
+}
+
+input[type="checkbox"].toggle-switch:checked {
+    background: #3b82f6 !important;
+    background-image: none !important;
+    border-color: transparent !important;
+}
+
+input[type="checkbox"].toggle-switch::before {
+    content: '' !important;
+    position: absolute !important;
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 50% !important;
+    background: white !important;
+    top: 2px !important;
+    left: 2px !important;
+    transition: transform 0.3s !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+input[type="checkbox"].toggle-switch:checked::before {
+    transform: translateX(24px) !important;
+}
+
+/* Hover y focus */
+input[type="checkbox"].toggle-switch:hover {
+    opacity: 0.9 !important;
+}
+
+input[type="checkbox"].toggle-switch:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+    outline: none !important;
+    border-color: transparent !important;
+}
+
+/* Desactivar el ícono de check de Tailwind Forms */
+input[type="checkbox"].toggle-switch:checked::after {
+    content: none !important;
+}
+
+/* Tarjetas de DNS */
+.dns-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.dns-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border-color: var(--accent-blue);
+}
+
+.dns-record-value {
+    background: var(--bg-tertiary);
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    word-break: break-all;
+    position: relative;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.dns-record-value:hover {
+    background: var(--bg-primary);
+}
+
+.copy-btn {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    padding: 4px 8px;
+    background: var(--accent-blue);
+    color: white;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+    cursor: pointer;
+}
+
+.dns-record-value:hover .copy-btn {
+    opacity: 1;
+}
+
+/* Badges y etiquetas */
+.dns-type-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Badges para tema oscuro */
+.badge-A { background: #3b82f6; color: white; }
+.badge-AAAA { background: #8b5cf6; color: white; }
+.badge-MX { background: #ef4444; color: white; }
+.badge-NS { background: #f59e0b; color: white; }
+.badge-TXT { background: #10b981; color: white; }
+.badge-CNAME { background: #06b6d4; color: white; }
+.badge-SOA { background: #ec4899; color: white; }
+.badge-CAA { background: #6366f1; color: white; }
+
+/* Badges para tema claro - colores más suaves */
+[data-theme="light"] .badge-A { background: #dbeafe; color: #1e40af; }
+[data-theme="light"] .badge-AAAA { background: #ede9fe; color: #6b21a8; }
+[data-theme="light"] .badge-MX { background: #fee2e2; color: #991b1b; }
+[data-theme="light"] .badge-NS { background: #fed7aa; color: #92400e; }
+[data-theme="light"] .badge-TXT { background: #d1fae5; color: #065f46; }
+[data-theme="light"] .badge-CNAME { background: #cffafe; color: #155e75; }
+[data-theme="light"] .badge-SOA { background: #fce7f3; color: #9f1239; }
+[data-theme="light"] .badge-CAA { background: #e0e7ff; color: #3730a3; }
+
+/* Tooltips educativos */
+.info-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: var(--accent-blue);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 16px;
+    font-size: 10px;
+    cursor: help;
+    margin-left: 4px;
+}
+
+/* Dropdown de historial */
+.history-item {
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.history-time {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Barra de progreso */
+.progress-segment {
+    height: 100%;
+    float: left;
+    transition: width 0.3s ease;
+}
+
+.progress-segment.completed {
+    background: var(--accent-green);
+}
+
+.progress-segment.in-progress {
+    background: var(--accent-blue);
+    animation: pulse 1s infinite;
+}
+
+.progress-segment.error {
+    background: #ef4444;
+}
+
+/* Vista de tabla */
+.dns-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.dns-table th {
+    background: var(--bg-tertiary);
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.dns-table td {
+    padding: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.dns-table tr:hover td {
+    background: var(--bg-tertiary);
+}
+
+/* Vista compacta */
+.compact-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.compact-item:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--accent-blue);
+}
+
+/* Panel de favoritos */
+.favorite-item {
+    background: var(--bg-tertiary);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.favorite-item:hover {
+    background: var(--accent-blue);
+    transform: translateX(4px);
+}
+
+/* Toast de notificaciones */
+.toast-success {
+    background: var(--accent-green);
+}
+
+.toast-error {
+    background: #ef4444;
+}
+
+.toast-info {
+    background: var(--accent-blue);
+}
+
+/* Modal */
+.modal-backdrop {
+    backdrop-filter: blur(8px);
+}
+
+/* Efectos de hover y focus */
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: var(--accent-blue);
+}
+
+button {
+    cursor: pointer;
+    user-select: none;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .dns-card {
+        padding: 1rem;
+    }
+    
+    .container {
+        padding: 0 1rem;
+    }
+    
+    #favoritesPanel {
+        width: 100%;
+        right: 0;
+        left: 0;
+        border-radius: 0;
+    }
+}
+
+/* Animación de carga diferida */
+.stagger-animation > * {
+    opacity: 0;
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+.stagger-animation > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-animation > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-animation > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-animation > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-animation > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-animation > *:nth-child(6) { animation-delay: 0.6s; }
+
+/* Efectos de glassmorphism */
+.glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradientes */
+.gradient-blue-purple {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Estados de carga skeleton */
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Estilos adicionales para tema claro */
+[data-theme="light"] {
+    /* Botones principales */
+    --btn-primary-bg: #2563eb;
+    --btn-primary-hover: #1d4ed8;
+    --btn-secondary-bg: #f3f4f6;
+    --btn-secondary-hover: #e5e7eb;
+}
+
+/* Botones de acción en tema claro */
+[data-theme="light"] #lookupButton {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+}
+
+[data-theme="light"] #lookupButton:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
+}
+
+[data-theme="light"] #batchLookupButton {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+}
+
+[data-theme="light"] #compareButton {
+    background: linear-gradient(135deg, #059669 0%, #14b8a6 100%);
+}
+
+[data-theme="light"] .tab-btn,
+[data-theme="light"] .view-btn {
+    background: #f9fafb;
+    color: #374151;
+}
+
+[data-theme="light"] .tab-btn:hover,
+[data-theme="light"] .view-btn:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+[data-theme="light"] .tab-btn.active,
+[data-theme="light"] .view-btn.active {
+    background: #2563eb;
+    color: white;
+}
+
+/* Botones de exportación en tema claro */
+[data-theme="light"] #exportJSON,
+[data-theme="light"] #exportCSV,
+[data-theme="light"] #exportTXT {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+[data-theme="light"] #exportJSON:hover,
+[data-theme="light"] #exportCSV:hover,
+[data-theme="light"] #exportTXT:hover {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+[data-theme="light"] #shareResults {
+    background: #2563eb;
+    color: white;
+}
+
+[data-theme="light"] #shareResults:hover {
+    background: #1d4ed8;
+}
+
+[data-theme="light"] #copyAllResults {
+    background: #10b981;
+    color: white;
+}
+
+[data-theme="light"] #copyAllResults:hover {
+    background: #059669;
+}
+
+/* Estados de error y éxito en tema claro */
+[data-theme="light"] #errorMessage {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+}
+
+[data-theme="light"] #successMessage {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+}
+
+/* Loader y progreso en tema claro */
+[data-theme="light"] #loader p {
+    color: #6b7280;
+}
+
+[data-theme="light"] #progressFill {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+}
+
+[data-theme="light"] #progressBar > div {
+    background: #e5e7eb;
+}
+
+/* Tooltips en tema claro */
+[data-theme="light"] #tooltipTitle {
+    color: #111827;
+}
+
+[data-theme="light"] #tooltipDescription {
+    color: #4b5563;
+}
+
+[data-theme="light"] #tooltipExample {
+    background: #f9fafb;
+    color: #374151;
+}
+
+/* Print styles */
+@media print {
+    body {
+        background: white;
+        color: black;
+    }
+    
+    header, #favoritesPanel, #toggleFavorites, #settingsModal {
+        display: none !important;
+    }
+    
+    .dns-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}

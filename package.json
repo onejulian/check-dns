@@ -1,0 +1,27 @@
+{
+  "name": "dns-inspector-pro",
+  "version": "1.0.0",
+  "description": "Herramienta profesional para consultar, analizar y exportar registros DNS con múltiples funcionalidades avanzadas",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000 || python -m SimpleHTTPServer 8000",
+    "serve": "npx http-server -p 8000",
+    "dev": "npx live-server --port=8000"
+  },
+  "keywords": [
+    "dns",
+    "dns-lookup",
+    "dns-checker",
+    "dns-analyzer",
+    "network-tools",
+    "pwa",
+    "web-app"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2",
+    "sharp": "^0.34.3"
+  }
+}

@@ -3,144 +3,490 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscador de Registros DNS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
+    <title>DNS Inspector Pro - Analizador Avanzado de Registros DNS</title>
+    <meta name="description" content="Herramienta profesional para consultar, analizar y exportar registros DNS con múltiples funcionalidades avanzadas">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e293b">
+    
+    <!-- Script de inicialización temprana del tema -->
+    <script>
+        // Aplicar tema inmediatamente para evitar parpadeo
+        (function() {
+            const savedTheme = localStorage.getItem('dns_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            if (savedTheme === 'light') {
+                document.body?.classList.remove('bg-gray-900', 'text-white');
+                document.body?.classList.add('bg-white', 'text-gray-900');
+            }
+        })();
+    </script>
+    
+    <!-- Tailwind CSS (Production) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script>
+        // Configuración de Tailwind para producción
+        tailwind.config = {
+            darkMode: 'selector',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif']
+                    },
+                    colors: {
+                        'light': {
+                            'primary': '#ffffff',
+                            'secondary': '#f8fafc',
+                            'tertiary': '#e2e8f0'
+                        }
+                    }
+                }
+            }
         }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3b82f6;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+        // Suprimir advertencia en desarrollo local
+        if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+            console.warn = (function() {
+                const originalWarn = console.warn;
+                return function(...args) {
+                    if (args[0] && args[0].includes && args[0].includes('cdn.tailwindcss.com should not be used in production')) {
+                        return;
+                    }
+                    originalWarn.apply(console, args);
+                };
+            })();
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+    </script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-gray-900 text-white min-h-screen antialiased">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">Buscador de Registros DNS</h1>
-            <p class="mt-4 text-lg text-gray-400">Ingresa un nombre de dominio para ver sus registros DNS asociados.</p>
-        </header>
+<body class="font-inter min-h-screen antialiased transition-colors duration-300" data-theme="dark">
+    <!-- Header con controles principales -->
+    <header class="sticky top-0 z-50 backdrop-blur-lg transition-all duration-300">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-network-wired text-2xl text-blue-500"></i>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                        DNS Inspector Pro
+                    </h1>
+                </div>
+                
+                <!-- Controles del header -->
+                <div class="flex items-center space-x-4">
+                    <!-- Selector de idioma -->
+                    <select id="languageSelector" class="px-3 py-1 rounded-lg text-sm transition-all duration-300">
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="en">🇬🇧 English</option>
+                    </select>
+                    
+                    <!-- Toggle de tema -->
+                    <button id="themeToggle" class="p-2 rounded-lg transition-all duration-300">
+                        <i class="fas fa-moon text-yellow-400 theme-icon"></i>
+                    </button>
+                    
+                    <!-- Botón de configuración -->
+                    <button id="settingsBtn" class="p-2 rounded-lg transition-all duration-300">
+                        <i class="fas fa-cog text-gray-400"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
 
-        <main>
-            <!-- Formulario de búsqueda -->
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-3 mb-10">
-                <input type="text" id="domainInput" placeholder="ejemplo.com" class="w-full max-w-md bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                <button id="lookupButton" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    Buscar
+    <!-- Contenido principal -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Sección de búsqueda -->
+        <section class="mb-8">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-bold mb-2" data-i18n="mainTitle">Analizador de Registros DNS</h2>
+                <p class="text-gray-500 dark:text-gray-400" data-i18n="mainSubtitle">Consulta y analiza registros DNS con herramientas profesionales</p>
+            </div>
+
+            <!-- Tabs de modo de búsqueda -->
+            <div class="flex justify-center mb-6">
+                <div class="rounded-lg p-1 inline-flex transition-all duration-300">
+                    <button class="tab-btn active px-4 py-2 rounded-md transition" data-mode="single">
+                        <i class="fas fa-search mr-2"></i>Búsqueda Simple
+                    </button>
+                    <button class="tab-btn px-4 py-2 rounded-md transition" data-mode="batch">
+                        <i class="fas fa-layer-group mr-2"></i>Búsqueda en Lote
+                    </button>
+                    <button class="tab-btn px-4 py-2 rounded-md transition" data-mode="compare">
+                        <i class="fas fa-code-compare mr-2"></i>Comparar DNS
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formulario de búsqueda simple -->
+            <div id="singleSearchForm" class="search-form">
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <div class="flex-1 relative">
+                            <input 
+                                type="text" 
+                                id="domainInput" 
+                                placeholder="ejemplo.com o https://ejemplo.com" 
+                                class="w-full rounded-lg px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                                autocomplete="off"
+                            >
+                            <button id="clearInput" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 hidden">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <!-- Dropdown de historial -->
+                            <div id="historyDropdown" class="absolute top-full left-0 right-0 mt-1 rounded-lg shadow-xl hidden z-20 transition-all duration-300">
+                                <!-- Se llenará dinámicamente -->
+                            </div>
+                        </div>
+                        
+                        <button id="lookupButton" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-lg transition flex items-center justify-center">
+                            <i class="fas fa-search mr-2"></i>
+                            <span>Buscar DNS</span>
+                        </button>
+                    </div>
+
+                    <!-- Opciones avanzadas -->
+                    <div class="mt-4">
+                        <button id="toggleAdvanced" class="text-blue-400 hover:text-blue-300 text-sm">
+                            <i class="fas fa-chevron-down mr-1"></i>
+                            Opciones Avanzadas
+                        </button>
+                        
+                        <div id="advancedOptions" class="hidden mt-4 p-4 rounded-lg transition-all duration-300">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <!-- Selector de servidor DNS -->
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Servidor DNS</label>
+                                    <select id="dnsServer" class="w-full rounded-lg px-3 py-2 transition-all duration-300">
+                                        <option value="google">Google (8.8.8.8)</option>
+                                        <option value="cloudflare">Cloudflare (1.1.1.1)</option>
+                                        <option value="opendns">OpenDNS</option>
+                                        <option value="all">Comparar todos</option>
+                                    </select>
+                                </div>
+
+                                <!-- Tipos de registro -->
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Tipos de Registro</label>
+                                    <div class="flex flex-wrap gap-2">
+                                        <label class="inline-flex items-center">
+                                            <input type="checkbox" class="record-type" value="A" checked>
+                                            <span class="ml-1 text-sm">A</span>
+                                        </label>
+                                        <label class="inline-flex items-center">
+                                            <input type="checkbox" class="record-type" value="AAAA" checked>
+                                            <span class="ml-1 text-sm">AAAA</span>
+                                        </label>
+                                        <label class="inline-flex items-center">
+                                            <input type="checkbox" class="record-type" value="MX" checked>
+                                            <span class="ml-1 text-sm">MX</span>
+                                        </label>
+                                        <label class="inline-flex items-center">
+                                            <input type="checkbox" class="record-type" value="NS" checked>
+                                            <span class="ml-1 text-sm">NS</span>
+                                        </label>
+                                        <label class="inline-flex items-center">
+                                            <input type="checkbox" class="record-type" value="TXT" checked>
+                                            <span class="ml-1 text-sm">TXT</span>
+                                        </label>
+                                        <label class="inline-flex items-center">
+                                            <input type="checkbox" class="record-type" value="CNAME" checked>
+                                            <span class="ml-1 text-sm">CNAME</span>
+                                        </label>
+                                        <label class="inline-flex items-center">
+                                            <input type="checkbox" class="record-type" value="SOA" checked>
+                                            <span class="ml-1 text-sm">SOA</span>
+                                        </label>
+                                        <label class="inline-flex items-center">
+                                            <input type="checkbox" class="record-type" value="CAA">
+                                            <span class="ml-1 text-sm">CAA</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Buscar subdominios -->
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Subdominios Comunes</label>
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" id="checkSubdomains">
+                                        <span class="ml-2 text-sm">Buscar subdominios (www, mail, ftp, etc.)</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de búsqueda en lote -->
+            <div id="batchSearchForm" class="search-form hidden">
+                <div class="max-w-4xl mx-auto">
+                    <textarea 
+                        id="batchDomains" 
+                        placeholder="Ingresa múltiples dominios (uno por línea)&#10;ejemplo1.com&#10;ejemplo2.com&#10;ejemplo3.com"
+                        class="w-full h-32 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                    ></textarea>
+                    <div class="flex justify-between items-center mt-3">
+                        <label class="flex items-center">
+                            <input type="file" id="importFile" accept=".txt,.csv" class="hidden">
+                            <button onclick="document.getElementById('importFile').click()" class="text-blue-400 hover:text-blue-300">
+                                <i class="fas fa-upload mr-2"></i>Importar archivo
+                            </button>
+                        </label>
+                        <button id="batchLookupButton" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-lg transition">
+                            <i class="fas fa-search mr-2"></i>Buscar Todos
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de comparación -->
+            <div id="compareForm" class="search-form hidden">
+                <div class="max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input 
+                            type="text" 
+                            id="compareDomain1" 
+                            placeholder="Primer dominio" 
+                            class="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                        >
+                        <input 
+                            type="text" 
+                            id="compareDomain2" 
+                            placeholder="Segundo dominio" 
+                            class="w-full rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+                        >
+                    </div>
+                    <button id="compareButton" class="mt-4 px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-semibold rounded-lg transition mx-auto block">
+                        <i class="fas fa-code-compare mr-2"></i>Comparar Dominios
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Barra de herramientas de resultados -->
+        <div id="resultsToolbar" class="hidden mb-4 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <!-- Selector de vista -->
+                <div class="flex rounded-lg p-1 transition-all duration-300">
+                    <button class="view-btn active px-3 py-1 rounded" data-view="cards">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="view-btn px-3 py-1 rounded" data-view="table">
+                        <i class="fas fa-table"></i>
+                    </button>
+                    <button class="view-btn px-3 py-1 rounded" data-view="compact">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+
+                <!-- Filtro de búsqueda -->
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="filterResults" 
+                        placeholder="Filtrar resultados..." 
+                        class="rounded-lg px-3 py-1 pr-8 text-sm transition-all duration-300"
+                    >
+                    <i class="fas fa-filter absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-xs"></i>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Botones de exportación -->
+                <div class="flex gap-2">
+                    <button id="exportJSON" class="px-3 py-1 rounded-lg text-sm transition-all duration-300">
+                        <i class="fas fa-file-code mr-1"></i>JSON
+                    </button>
+                    <button id="exportCSV" class="px-3 py-1 rounded-lg text-sm transition-all duration-300">
+                        <i class="fas fa-file-csv mr-1"></i>CSV
+                    </button>
+                    <button id="exportTXT" class="px-3 py-1 rounded-lg text-sm transition-all duration-300">
+                        <i class="fas fa-file-alt mr-1"></i>TXT
+                    </button>
+                </div>
+
+                <!-- Botón compartir -->
+                <button id="shareResults" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition">
+                    <i class="fas fa-share-alt mr-1"></i>Compartir
+                </button>
+
+                <!-- Botón copiar todo -->
+                <button id="copyAllResults" class="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-lg text-sm transition">
+                    <i class="fas fa-copy mr-1"></i>Copiar Todo
                 </button>
             </div>
+        </div>
 
-            <!-- Contenedor para el loader y los resultados -->
-            <div id="statusContainer" class="text-center">
-                <div id="loader" class="loader mx-auto hidden"></div>
-                <p id="errorMessage" class="text-red-400 mt-4"></p>
+        <!-- Contenedor de estado y progreso -->
+        <div id="statusContainer" class="text-center mb-6">
+            <!-- Barra de progreso -->
+            <div id="progressBar" class="hidden mb-4">
+                                    <div class="max-w-md mx-auto">
+                        <div class="rounded-full h-2 overflow-hidden transition-all duration-300">
+                        <div id="progressFill" class="bg-gradient-to-r from-blue-500 to-purple-600 h-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <p id="progressText" class="text-sm text-gray-400 mt-2"></p>
+                </div>
             </div>
-            
-            <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                <!-- Los resultados de los registros DNS se insertarán aquí -->
+
+            <!-- Loader -->
+            <div id="loader" class="hidden">
+                <div class="loader-spinner mx-auto mb-3"></div>
+                <p class="text-gray-400">Consultando registros DNS...</p>
             </div>
-        </main>
+
+            <!-- Mensajes -->
+            <div id="errorMessage" class="hidden text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 max-w-md mx-auto transition-all duration-300"></div>
+            <div id="successMessage" class="hidden text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 max-w-md mx-auto transition-all duration-300"></div>
+        </div>
+
+        <!-- Contenedor de resultados -->
+        <div id="resultsContainer">
+            <!-- Vista de tarjetas -->
+            <div id="cardsView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Los resultados se insertarán aquí -->
+            </div>
+
+            <!-- Vista de tabla -->
+            <div id="tableView" class="hidden overflow-x-auto">
+                <table class="w-full rounded-lg overflow-hidden transition-all duration-300">
+                    <thead class="transition-all duration-300">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Tipo</th>
+                            <th class="px-4 py-3 text-left">Valor</th>
+                            <th class="px-4 py-3 text-left">TTL</th>
+                            <th class="px-4 py-3 text-left">Prioridad</th>
+                            <th class="px-4 py-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Los resultados se insertarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Vista compacta -->
+            <div id="compactView" class="hidden space-y-2">
+                <!-- Los resultados se insertarán aquí -->
+            </div>
+        </div>
+
+            <!-- Panel de favoritos (flotante) -->
+    <div id="favoritesPanel" class="fixed right-4 top-20 w-64 rounded-lg shadow-xl p-4 hidden z-40 transition-all duration-300">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-semibold">Favoritos</h3>
+                <button id="closeFavorites" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="favoritesList" class="space-y-2">
+                <!-- Los favoritos se insertarán aquí -->
+            </div>
+            <button id="addCurrentToFavorites" class="w-full mt-3 px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition">
+                <i class="fas fa-star mr-1"></i>Añadir Actual
+            </button>
+        </div>
+
+        <!-- Botón flotante de favoritos -->
+        <button id="toggleFavorites" class="fixed right-4 bottom-4 w-14 h-14 bg-yellow-500 hover:bg-yellow-600 rounded-full shadow-lg transition transform hover:scale-110 z-30">
+            <i class="fas fa-star text-white text-xl"></i>
+        </button>
+    </main>
+
+    <!-- Modal de configuración -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="rounded-xl max-w-md w-full p-6 transition-all duration-300">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold">Configuración</h3>
+                    <button id="closeSettings" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- Configuración de caché -->
+                    <div>
+                        <label class="flex items-center justify-between">
+                            <span>Habilitar caché</span>
+                            <input type="checkbox" id="enableCache" class="toggle-switch" checked>
+                        </label>
+                        <p class="text-sm text-gray-400 mt-1">Guarda resultados para consultas más rápidas</p>
+                    </div>
+
+                    <!-- TTL del caché -->
+                    <div>
+                        <label class="block mb-2">Duración del caché (minutos)</label>
+                        <input type="number" id="cacheTTL" value="5" min="1" max="60" class="w-full rounded-lg px-3 py-2 transition-all duration-300">
+                    </div>
+
+                    <!-- Auto-completado -->
+                    <div>
+                        <label class="flex items-center justify-between">
+                            <span>Autocompletar subdominios</span>
+                            <input type="checkbox" id="autoSubdomains" class="toggle-switch">
+                        </label>
+                    </div>
+
+                    <!-- Notificaciones -->
+                    <div>
+                        <label class="flex items-center justify-between">
+                            <span>Notificaciones de escritorio</span>
+                            <input type="checkbox" id="enableNotifications" class="toggle-switch">
+                        </label>
+                    </div>
+
+                    <!-- Limpiar datos -->
+                    <div class="pt-4 border-t border-gray-700">
+                        <button id="clearCache" class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
+                            <i class="fas fa-trash mr-2"></i>Limpiar Caché
+                        </button>
+                        <button id="clearHistory" class="w-full mt-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 rounded-lg transition">
+                            <i class="fas fa-history mr-2"></i>Limpiar Historial
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Toast de notificaciones -->
+    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-xl hidden z-50 transition-all">
+        <div class="flex items-center">
+            <i id="toastIcon" class="fas fa-check-circle mr-3"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <!-- Información educativa (tooltip) -->
+    <div id="dnsTooltip" class="absolute rounded-lg p-4 shadow-xl hidden z-50 max-w-sm transition-all duration-300">
+        <h4 id="tooltipTitle" class="font-semibold mb-2"></h4>
+        <p id="tooltipDescription" class="text-sm text-gray-400"></p>
+        <div id="tooltipExample" class="mt-2 text-xs rounded p-2 font-mono transition-all duration-300"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/dns-lookup.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+    
+    <!-- Service Worker para PWA -->
     <script>
-        const domainInput = document.getElementById('domainInput');
-        const lookupButton = document.getElementById('lookupButton');
-        const resultsDiv = document.getElementById('results');
-        const loader = document.getElementById('loader');
-        const errorMessage = document.getElementById('errorMessage');
-
-        // Función para manejar la búsqueda al hacer clic o presionar Enter
-        const handleLookup = async () => {
-            const domain = domainInput.value.trim();
-            if (!domain) {
-                showError("Por favor, introduce un nombre de dominio.");
-                return;
-            }
-            
-            // Limpiar estado previo
-            resultsDiv.innerHTML = '';
-            showError('');
-            loader.classList.remove('hidden');
-            lookupButton.disabled = true;
-
-            const recordTypes = ['A', 'AAAA', 'MX', 'NS', 'TXT', 'CNAME', 'SOA'];
-            let hasResults = false;
-
-            // Mapeamos cada tipo de registro a una promesa de fetch
-            const promises = recordTypes.map(type => 
-                fetch(`https://dns.google/resolve?name=${domain}&type=${type}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Error en la red para el tipo ${type}`);
-                        }
-                        return response.json();
-                    })
-                    .catch(error => {
-                        console.error(`Error fetching ${type} record:`, error);
-                        return null; // Devolver null en caso de error para no romper Promise.all
-                    })
-            );
-
-            try {
-                const responses = await Promise.all(promises);
-
-                responses.forEach((data, index) => {
-                    if (data && data.Answer) {
-                        const type = recordTypes[index];
-                        displayRecord(type, data.Answer);
-                        hasResults = true;
-                    }
-                });
-
-                if (!hasResults) {
-                    showError(`No se encontraron registros DNS para "${domain}".`);
-                }
-
-            } catch (error) {
-                console.error('Error general en la búsqueda de DNS:', error);
-                showError('Ocurrió un error al realizar la búsqueda. Inténtalo de nuevo.');
-            } finally {
-                loader.classList.add('hidden');
-                lookupButton.disabled = false;
-            }
-        };
-
-        lookupButton.addEventListener('click', handleLookup);
-        domainInput.addEventListener('keyup', (event) => {
-            if (event.key === 'Enter') {
-                handleLookup();
-            }
-        });
-
-        // Función para mostrar un registro en la UI
-        function displayRecord(type, answers) {
-            const card = document.createElement('div');
-            card.className = 'bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-300';
-
-            let content = `<h2 class="text-xl font-semibold text-blue-400 mb-3">${type} Records</h2><ul class="list-none space-y-2 text-gray-300 break-all">`;
-            answers.forEach(answer => {
-                content += `<li class="bg-gray-700/50 p-2 rounded-md font-mono text-sm">${answer.data}</li>`;
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                console.log('Service Worker registrado:', reg);
+            }).catch(err => {
+                console.log('Error al registrar Service Worker:', err);
             });
-            content += '</ul>';
-
-            card.innerHTML = content;
-            resultsDiv.appendChild(card);
-        }
-
-        // Función para mostrar mensajes de error
-        function showError(message) {
-            errorMessage.textContent = message;
         }
     </script>
 </body>

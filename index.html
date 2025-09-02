@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Registros DNS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen antialiased">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">Buscador de Registros DNS</h1>
+            <p class="mt-4 text-lg text-gray-400">Ingresa un nombre de dominio para ver sus registros DNS asociados.</p>
+        </header>
+
+        <main>
+            <!-- Formulario de búsqueda -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-3 mb-10">
+                <input type="text" id="domainInput" placeholder="ejemplo.com" class="w-full max-w-md bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                <button id="lookupButton" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition duration-200 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    Buscar
+                </button>
+            </div>
+
+            <!-- Contenedor para el loader y los resultados -->
+            <div id="statusContainer" class="text-center">
+                <div id="loader" class="loader mx-auto hidden"></div>
+                <p id="errorMessage" class="text-red-400 mt-4"></p>
+            </div>
+            
+            <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                <!-- Los resultados de los registros DNS se insertarán aquí -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const domainInput = document.getElementById('domainInput');
+        const lookupButton = document.getElementById('lookupButton');
+        const resultsDiv = document.getElementById('results');
+        const loader = document.getElementById('loader');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Función para manejar la búsqueda al hacer clic o presionar Enter
+        const handleLookup = async () => {
+            const domain = domainInput.value.trim();
+            if (!domain) {
+                showError("Por favor, introduce un nombre de dominio.");
+                return;
+            }
+            
+            // Limpiar estado previo
+            resultsDiv.innerHTML = '';
+            showError('');
+            loader.classList.remove('hidden');
+            lookupButton.disabled = true;
+
+            const recordTypes = ['A', 'AAAA', 'MX', 'NS', 'TXT', 'CNAME', 'SOA'];
+            let hasResults = false;
+
+            // Mapeamos cada tipo de registro a una promesa de fetch
+            const promises = recordTypes.map(type => 
+                fetch(`https://dns.google/resolve?name=${domain}&type=${type}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Error en la red para el tipo ${type}`);
+                        }
+                        return response.json();
+                    })
+                    .catch(error => {
+                        console.error(`Error fetching ${type} record:`, error);
+                        return null; // Devolver null en caso de error para no romper Promise.all
+                    })
+            );
+
+            try {
+                const responses = await Promise.all(promises);
+
+                responses.forEach((data, index) => {
+                    if (data && data.Answer) {
+                        const type = recordTypes[index];
+                        displayRecord(type, data.Answer);
+                        hasResults = true;
+                    }
+                });
+
+                if (!hasResults) {
+                    showError(`No se encontraron registros DNS para "${domain}".`);
+                }
+
+            } catch (error) {
+                console.error('Error general en la búsqueda de DNS:', error);
+                showError('Ocurrió un error al realizar la búsqueda. Inténtalo de nuevo.');
+            } finally {
+                loader.classList.add('hidden');
+                lookupButton.disabled = false;
+            }
+        };
+
+        lookupButton.addEventListener('click', handleLookup);
+        domainInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                handleLookup();
+            }
+        });
+
+        // Función para mostrar un registro en la UI
+        function displayRecord(type, answers) {
+            const card = document.createElement('div');
+            card.className = 'bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg transform hover:scale-105 transition-transform duration-300';
+
+            let content = `<h2 class="text-xl font-semibold text-blue-400 mb-3">${type} Records</h2><ul class="list-none space-y-2 text-gray-300 break-all">`;
+            answers.forEach(answer => {
+                content += `<li class="bg-gray-700/50 p-2 rounded-md font-mono text-sm">${answer.data}</li>`;
+            });
+            content += '</ul>';
+
+            card.innerHTML = content;
+            resultsDiv.appendChild(card);
+        }
+
+        // Función para mostrar mensajes de error
+        function showError(message) {
+            errorMessage.textContent = message;
+        }
+    </script>
+</body>
+</html>
